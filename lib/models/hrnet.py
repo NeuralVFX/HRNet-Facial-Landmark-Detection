@@ -1,3 +1,5 @@
+#
+
 # ------------------------------------------------------------------------------
 # Copyright (c) Microsoft
 # Licensed under the MIT License.
@@ -15,6 +17,8 @@ import logging
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import dataclasses
+
 
 
 BatchNorm2d = nn.BatchNorm2d
@@ -51,7 +55,7 @@ class BasicBlock(nn.Module):
         out = self.conv2(out)
         out = self.bn2(out)
 
-        if self.downsample is not None:
+        if self.downsample != None:
             residual = self.downsample(x)
 
         out += residual
@@ -92,7 +96,7 @@ class Bottleneck(nn.Module):
         out = self.conv3(out)
         out = self.bn3(out)
 
-        if self.downsample is not None:
+        if self.downsample != None:
             residual = self.downsample(x)
 
         out += residual
@@ -413,7 +417,7 @@ class HighResolutionNet(nn.Module):
 
         x_list = []
         for i in range(self.stage2_cfg['NUM_BRANCHES']):
-            if self.transition1[i] is not None:
+            if self.transition1[i] != None:
                 x_list.append(self.transition1[i](x))
             else:
                 x_list.append(x)
@@ -421,7 +425,7 @@ class HighResolutionNet(nn.Module):
 
         x_list = []
         for i in range(self.stage3_cfg['NUM_BRANCHES']):
-            if self.transition2[i] is not None:
+            if self.transition2[i] != None:
                 x_list.append(self.transition2[i](y_list[-1]))
             else:
                 x_list.append(y_list[i])
@@ -429,7 +433,7 @@ class HighResolutionNet(nn.Module):
 
         x_list = []
         for i in range(self.stage4_cfg['NUM_BRANCHES']):
-            if self.transition3[i] is not None:
+            if self.transition3[i] != None:
                 x_list.append(self.transition3[i](y_list[-1]))
             else:
                 x_list.append(y_list[i])
@@ -444,6 +448,7 @@ class HighResolutionNet(nn.Module):
         x = self.head(x)
 
         return x
+
 
     def init_weights(self, pretrained=''):
         logger.info('=> init weights from normal distribution')
@@ -476,3 +481,57 @@ def get_face_alignment_net(config, **kwargs):
 
     return model
 
+
+
+
+@dataclasses.dataclass(eq=False)
+class JitNone(nn.Module):
+    def __init__(self):
+        super(JitNone, self).__init__()
+
+    def __eq__(self, OTHER):
+        if OTHER == None:
+            return True
+        else:
+            return False
+
+    def __hash__(self):
+        return 1000
+
+    def forward(self, x):
+        return x
+
+
+def clean_none_modules(model):
+  l = [module for module in model.modules() if type(module) == nn.ModuleList]
+  for module in l:
+    for i, mod in enumerate(module):
+      if mod == None:
+        module[i] = JitNone()
+    for m in module:
+      if m == None:
+        print (m)
+
+
+def smooth_decode(result):
+    clip_result = torch.clamp(result, .0001, 999)
+
+    max_result = clip_result.sum(2).sum(2)
+    eq_result = clip_result / max_result[:, :, None, None]
+    uv_grid = uv(64, 254, 2, 2, 254)
+    uv_grid = uv_grid.permute(1, 2, 0)
+    out_tes = (uv_grid[None, None, :, :, :].cuda() * eq_result[:, :, :, :, None]).sum(2).sum(2)
+
+    return out_tes
+
+
+class CustomResnet(nn.Module):
+    # Combine body and head
+    def __init__(self, model):
+        super(CustomResnet, self).__init__()
+        clean_none_modules(model)
+        self.resnet = model
+
+    def forward(self, x):
+        result = self.resnet(x)
+        return smooth_decode(result)

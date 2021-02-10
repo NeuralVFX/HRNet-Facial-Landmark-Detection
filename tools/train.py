@@ -51,6 +51,23 @@ def main():
 
     model = models.get_face_alignment_net(config)
 
+    # load pretrained model
+    state_dict = torch.load('hrnetv2_pretrained/HR18-300W.pth')
+    new_state_dict = state_dict.copy()
+
+    keys = state_dict.keys()
+    for key in keys:
+        print(key)
+        info = new_state_dict.pop(key)
+        name = key.replace('module.', '')
+        new_state_dict[name] = info
+
+    model.load_state_dict(new_state_dict, strict=False)
+
+    # wrap model
+
+    model = model.CustomResnet(model)
+
     # copy model files
     writer_dict = {
         'writer': SummaryWriter(log_dir=tb_log_dir),

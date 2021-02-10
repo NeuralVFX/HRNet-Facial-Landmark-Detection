@@ -16,6 +16,7 @@ import numpy as np
 from ..utils.transforms import fliplr_joints, crop, generate_target, transform_pixel
 
 
+
 class Face300W(data.Dataset):
 
     def __init__(self, cfg, is_train=True, transform=None):
@@ -81,7 +82,7 @@ class Face300W(data.Dataset):
         for i in range(nparts):
             if tpts[i, 1] > 0:
                 tpts[i, 0:2] = transform_pixel(tpts[i, 0:2]+1, center,
-                                               scale, self.output_size, rot=r)
+                                               scale, [256,256], rot=r)
                 target[i] = generate_target(target[i], tpts[i]-1, self.sigma,
                                             label_type=self.label_type)
         img = img.astype(np.float32)
@@ -91,8 +92,10 @@ class Face300W(data.Dataset):
         tpts = torch.Tensor(tpts)
         center = torch.Tensor(center)
 
+        #newpts = transform_preds_inv(torch.tensor(pts), center, scale, [256,256])
+
         meta = {'index': idx, 'center': center, 'scale': scale,
-                'pts': torch.Tensor(pts), 'tpts': tpts}
+                'pts':pts , 'tpts': tpts}
 
         return img, target, meta
 

@@ -43,7 +43,6 @@ class AverageMeter(object):
 
 def train(config, train_loader, model, critertion, optimizer,
           epoch, writer_dict):
-
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -56,18 +55,16 @@ def train(config, train_loader, model, critertion, optimizer,
 
     for i, (inp, target, meta) in enumerate(train_loader):
         # measure data time
-        data_time.update(time.time()-end)
+        data_time.update(time.time() - end)
 
         # compute the output
+        inp = inp.cuda().float()
         output = model(inp)
-        target = target.cuda(non_blocking=True)
 
-        loss = critertion(output, target)
+        loss = critertion(output / 256., meta['tpts'].cuda() / 256.)
 
         # NME
-        score_map = output.data.cpu()
-        preds = decode_preds(score_map, meta['center'], meta['scale'], [64, 64])
-
+        preds = output.data.cpu()
         nme_batch = compute_nme(preds, meta)
         nme_batch_sum = nme_batch_sum + np.sum(nme_batch)
         nme_count = nme_count + preds.size(0)
@@ -79,16 +76,16 @@ def train(config, train_loader, model, critertion, optimizer,
 
         losses.update(loss.item(), inp.size(0))
 
-        batch_time.update(time.time()-end)
+        batch_time.update(time.time() - end)
         if i % config.PRINT_FREQ == 0:
             msg = 'Epoch: [{0}][{1}/{2}]\t' \
                   'Time {batch_time.val:.3f}s ({batch_time.avg:.3f}s)\t' \
                   'Speed {speed:.1f} samples/s\t' \
                   'Data {data_time.val:.3f}s ({data_time.avg:.3f}s)\t' \
                   'Loss {loss.val:.5f} ({loss.avg:.5f})\t'.format(
-                      epoch, i, len(train_loader), batch_time=batch_time,
-                      speed=inp.size(0)/batch_time.val,
-                      data_time=data_time, loss=losses)
+                epoch, i, len(train_loader), batch_time=batch_time,
+                speed=inp.size(0) / batch_time.val,
+                data_time=data_time, loss=losses)
             logger.info(msg)
 
             if writer_dict:
@@ -99,7 +96,7 @@ def train(config, train_loader, model, critertion, optimizer,
 
         end = time.time()
     nme = nme_batch_sum / nme_count
-    msg = 'Train Epoch {} time:{:.4f} loss:{:.4f} nme:{:.4f}'\
+    msg = 'Train Epoch {} time:{:.4f} loss:{:.4f} nme:{:.4f}' \
         .format(epoch, batch_time.avg, losses.avg, nme)
     logger.info(msg)
 
@@ -124,14 +121,18 @@ def validate(config, val_loader, model, criterion, epoch, writer_dict):
     with torch.no_grad():
         for i, (inp, target, meta) in enumerate(val_loader):
             data_time.update(time.time() - end)
-            output = model(inp)
+            output = model(inp.cuda())
             target = target.cuda(non_blocking=True)
+            #fixdata
+            #meta['pts'] = transform_preds_inv_batch(meta['pts'], meta['center'], meta['scale'], [256,256])
 
             score_map = output.data.cpu()
             # loss
-            loss = criterion(output, target)
+            loss = criterion(output/256.,meta['tpts'].cuda()/256.)
 
-            preds = decode_preds(score_map, meta['center'], meta['scale'], [64, 64])
+            # NME
+            preds = output.data.cpu()
+
             # NME
             nme_temp = compute_nme(preds, meta)
             # Failure Rate under different threshold
@@ -168,6 +169,7 @@ def validate(config, val_loader, model, criterion, epoch, writer_dict):
         writer_dict['valid_global_steps'] = global_steps + 1
 
     return nme, predictions
+
 
 
 def inference(config, data_loader, model):

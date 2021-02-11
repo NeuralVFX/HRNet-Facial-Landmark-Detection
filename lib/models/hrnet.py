@@ -516,6 +516,7 @@ def clean_none_modules(model):
     for m in module:
       if m == None:
         print (m)
+  return model
 
 
 def smooth_decode(result):
@@ -534,7 +535,7 @@ class CustomResnet(nn.Module):
     # Combine body and head
     def __init__(self, model):
         super(CustomResnet, self).__init__()
-        clean_none_modules(model)
+        model = clean_none_modules(model)
         self.resnet = model
 
     def forward(self, x):

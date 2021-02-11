@@ -62,11 +62,11 @@ def main():
         name = key.replace('module.', '')
         new_state_dict[name] = info
 
-    models.load_state_dict(new_state_dict, strict=False)
+    model.load_state_dict(new_state_dict, strict=False)
 
     # wrap model
 
-    model = model.CustomResnet(model)
+    model = models.CustomResnet(model)
 
     # copy model files
     writer_dict = {

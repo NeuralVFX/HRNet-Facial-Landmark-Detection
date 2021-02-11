@@ -14,9 +14,22 @@ import logging
 import torch
 import numpy as np
 
+from matplotlib import pyplot as plt
+import cv2
+
+
 from .evaluation import decode_preds, compute_nme
 
 logger = logging.getLogger(__name__)
+
+def render(im, all_points,name):
+    im =im.copy()
+    for idx in range(all_points.shape[0]):
+      p = all_points[idx]
+      cv2.circle(im, (int(p[0]), int(p[1])), 3, (0,0,255), -1)
+    plt.imshow(im)
+    plt.savefig(name)
+    plt.close
 
 
 class AverageMeter(object):
@@ -123,8 +136,6 @@ def validate(config, val_loader, model, criterion, epoch, writer_dict):
             data_time.update(time.time() - end)
             output = model(inp.cuda())
             target = target.cuda(non_blocking=True)
-            #fixdata
-            #meta['pts'] = transform_preds_inv_batch(meta['pts'], meta['center'], meta['scale'], [256,256])
 
             score_map = output.data.cpu()
             # loss
@@ -147,6 +158,11 @@ def validate(config, val_loader, model, criterion, epoch, writer_dict):
                 predictions[meta['index'][n], :, :] = preds[n, :, :]
 
             losses.update(loss.item(), inp.size(0))
+
+            # generate image
+            if i == 0:
+                render(render(inp[0].data.cpu().transpose(1,2,0)/2+.5, preds[0], f'output/300w/face_alignment_300w_hrnet_w18/test_{i}.png')
+
 
             # measure elapsed time
             batch_time.update(time.time() - end)

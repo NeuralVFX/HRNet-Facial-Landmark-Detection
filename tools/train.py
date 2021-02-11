@@ -49,7 +49,7 @@ def main():
     cudnn.determinstic = config.CUDNN.DETERMINISTIC
     cudnn.enabled = config.CUDNN.ENABLED
 
-    model = models.get_face_alignment_net(config)
+    orig_model = models.get_face_alignment_net(config)
 
     # load pretrained model
     state_dict = torch.load('hrnetv2_pretrained/HR18-300W.pth')
@@ -62,11 +62,11 @@ def main():
         name = key.replace('module.', '')
         new_state_dict[name] = info
 
-    model.load_state_dict(new_state_dict, strict=False)
+    orig_model.load_state_dict(new_state_dict, strict=False)
 
     # wrap model
 
-    model = models.CustomResnet(model)
+    model = models.CustomResnet(orig_model)
 
     # copy model files
     writer_dict = {
@@ -149,6 +149,9 @@ def main():
              "best_nme": best_nme,
              "optimizer": optimizer.state_dict(),
              }, predictions, is_best, final_output_dir, 'checkpoint_{}.pth'.format(epoch))
+
+        script_module = torch.jit.script(orig_model)
+        script_module.save(f"{final_output_dir}/land_mark_detect_{epoch+1}.ptc")
 
     final_model_state_file = os.path.join(final_output_dir,
                                           'final_state.pth')

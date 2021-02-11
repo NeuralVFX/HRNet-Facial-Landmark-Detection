@@ -2,12 +2,12 @@
 
 ## Fork Information
 
--This is a fork designed to make the network handle outputting floating-point values for much more stable results on video
--Increased accuracy is achieved by training for a couple of further epochs with an addition to the architecture and a modified loss
--The added module uses the heat map tensor as a weighted average to multiply by floating-point pixel coordinates
--Training for 5-10 epochs should be enough
--This modification only works with 300w dataset
--Also modified to be compatible with JIT tracing
+- This is a fork designed to make the network handle outputting floating-point values for much more stable results on video
+- Increased accuracy is achieved by training for a couple of further epochs with an addition to the architecture and a modified loss
+- The added module uses the heat map tensor as a weighted average to multiply by floating-point pixel coordinates
+- Training for 5-10 epochs should be enough
+- This modification only works with 300w dataset
+- Also modified to be compatible with JIT tracing
 
 ## News
 - [2020/03/13] Our paper is accepted by TPAMI: [Deep High-Resolution Representation Learning for Visual Recognition](https://arxiv.org/pdf/1908.07919.pdf).

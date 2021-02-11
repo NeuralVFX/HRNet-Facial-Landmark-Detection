@@ -502,6 +502,11 @@ class JitNone(nn.Module):
         return x
 
 
+def uv(size:int,u_max:float = 1., u_min:float = -1.,v_max:float = 1., v_min:float = -1.):
+    uv_grid = torch.tensor([[[[u_min,u_max],[u_min,u_max]],[[v_max,v_max],[v_min,v_min]]]]).float()
+    return nn.functional.interpolate(uv_grid,size = [size,size],mode='bilinear',align_corners=True)[0]
+
+
 def clean_none_modules(model):
   l = [module for module in model.modules() if type(module) == nn.ModuleList]
   for module in l:

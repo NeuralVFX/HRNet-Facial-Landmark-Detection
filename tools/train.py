@@ -130,7 +130,8 @@ def main():
     for epoch in range(last_epoch, config.TRAIN.END_EPOCH):
         lr_scheduler.step()
 
-        script_module = torch.jit.script(orig_model)
+        script_module = torch.jit.trace(orig_model,torch.rand(1, 3,256,256).cuda())
+
         script_module.save(f"{final_output_dir}/land_mark_detect_{epoch+1}.ptc")
 
         function.train(config, train_loader, model, criterion,

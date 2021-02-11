@@ -62,7 +62,7 @@ def main():
         name = key.replace('module.', '')
         new_state_dict[name] = info
 
-    model.load_state_dict(new_state_dict, strict=False)
+    models.load_state_dict(new_state_dict, strict=False)
 
     # wrap model
 

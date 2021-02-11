@@ -132,7 +132,7 @@ def main():
 
         script_module = torch.jit.trace(orig_model,torch.rand(1, 3,256,256).cuda())
 
-        script_module.save(f"{final_output_dir}/land_mark_detect_{epoch+1}.ptc")
+        script_module.save(f"{final_output_dir}/landmark_detect_{epoch+1}.ptc")
 
         function.train(config, train_loader, model, criterion,
                        optimizer, epoch, writer_dict)

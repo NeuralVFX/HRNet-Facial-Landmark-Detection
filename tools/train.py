@@ -135,7 +135,8 @@ def main():
 
         # evaluate
         nme, predictions = function.validate(config, val_loader, model,
-                                             criterion, epoch, writer_dict)
+                                             criterion, epoch, writer_dict,
+                                             final_output_dir)
 
         is_best = nme < best_nme
         best_nme = min(nme, best_nme)

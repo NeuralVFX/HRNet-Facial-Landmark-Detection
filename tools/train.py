@@ -130,6 +130,9 @@ def main():
     for epoch in range(last_epoch, config.TRAIN.END_EPOCH):
         lr_scheduler.step()
 
+        script_module = torch.jit.script(orig_model)
+        script_module.save(f"{final_output_dir}/land_mark_detect_{epoch+1}.ptc")
+
         function.train(config, train_loader, model, criterion,
                        optimizer, epoch, writer_dict)
 
@@ -150,8 +153,7 @@ def main():
              "optimizer": optimizer.state_dict(),
              }, predictions, is_best, final_output_dir, 'checkpoint_{}.pth'.format(epoch))
 
-        script_module = torch.jit.script(orig_model)
-        script_module.save(f"{final_output_dir}/land_mark_detect_{epoch+1}.ptc")
+
 
     final_model_state_file = os.path.join(final_output_dir,
                                           'final_state.pth')

@@ -1,4 +1,12 @@
-# High-resolution networks (HRNets) for facial landmark detection
+# High-resolution networks (HRNets) for facial landmark detection (Forked Modification)
+
+## Fork Information
+
+- This is a fork designed to make the netowrk handle outputting floating point values with increased accuracy
+- Increased accuracy is achieved by training for a couple further iterations with an addition to the architechute and a modified loss function
+- The added module uses the head map tensor as a weighted average to muliply with floating point pixel coordinates
+- Training for 5-10 epochs with the new module allows for much more stable results running on a video feed
+- Also modified to be compatible with JIT tracing
 
 ## News
 - [2020/03/13] Our paper is accepted by TPAMI: [Deep High-Resolution Representation Learning for Visual Recognition](https://arxiv.org/pdf/1908.07919.pdf).

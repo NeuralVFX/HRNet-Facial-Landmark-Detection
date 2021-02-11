@@ -11,4 +11,4 @@ from __future__ import print_function
 
 from .hrnet import get_face_alignment_net, HighResolutionNet
 
-__all__ = ['HighResolutionNet', 'get_face_alignment_net']
+__all__ = ['HighResolutionNet', 'get_face_alignment_net', 'CustomResnet']

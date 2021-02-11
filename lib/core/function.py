@@ -161,9 +161,9 @@ def validate(config, val_loader, model, criterion, epoch, writer_dict,final_outp
 
             # generate image
             if i == 0:
-                render(render(inp[0].data.cpu().numpy().transpose(1,2,0)/2+.5,
+                render(inp[0].data.cpu().numpy().transpose(1,2,0)/2+.5,
                               preds[0],
-                              f'{final_output_dir}/test_{i}.png'))
+                              f'{final_output_dir}/test_{i}.png')
 
 
             # measure elapsed time

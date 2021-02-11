@@ -92,8 +92,6 @@ class Face300W(data.Dataset):
         tpts = torch.Tensor(tpts)
         center = torch.Tensor(center)
 
-        #newpts = transform_preds_inv(torch.tensor(pts), center, scale, [256,256])
-
         meta = {'index': idx, 'center': center, 'scale': scale,
                 'pts':pts , 'tpts': tpts}
 

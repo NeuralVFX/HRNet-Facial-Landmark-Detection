@@ -486,6 +486,7 @@ def get_face_alignment_net(config, **kwargs):
 
 @dataclasses.dataclass(eq=False)
 class JitNone(nn.Module):
+    # Hashable None class for jit tracing
     def __init__(self):
         super(JitNone, self).__init__()
 
@@ -503,11 +504,13 @@ class JitNone(nn.Module):
 
 
 def uv(size:int,u_max:float = 1., u_min:float = -1.,v_max:float = 1., v_min:float = -1.):
+    # Generates a UV grid
     uv_grid = torch.tensor([[[[u_min,u_max],[u_min,u_max]],[[v_max,v_max],[v_min,v_min]]]]).float()
     return nn.functional.interpolate(uv_grid,size = [size,size],mode='bilinear',align_corners=True)[0]
 
 
 def clean_none_modules(model):
+  # Remove any instance of None in the model, for Jit scripting
   l = [module for module in model.modules() if type(module) == nn.ModuleList]
   for module in l:
     for i, mod in enumerate(module):
@@ -520,6 +523,7 @@ def clean_none_modules(model):
 
 
 def smooth_decode(result):
+    # Model head which allows weighed average predictions
     clip_result = torch.clamp(result, .0001, 999)
 
     max_result = clip_result.sum(2).sum(2)
@@ -535,7 +539,7 @@ class CustomResnet(nn.Module):
     # Combine body and head
     def __init__(self, model):
         super(CustomResnet, self).__init__()
-        model = clean_none_modules(model)
+        #model = clean_none_modules(model)
         self.resnet = model
 
     def forward(self, x):

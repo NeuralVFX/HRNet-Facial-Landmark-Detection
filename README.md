@@ -2,10 +2,10 @@
 
 ## Fork Information
 
-- This is a fork designed to make the netowrk handle outputting floating point values with increased accuracy
-- Increased accuracy is achieved by training for a couple further iterations with an addition to the architechute and a modified loss function
+- This is a fork designed to make the netowrk handle outputting floating point values for much more stable results on video 
+- Increased accuracy is achieved by training for a couple further epochs with an addition to the architechute and a modified loss
 - The added module uses the heat map tensor as a weighted average to muliply by floating point pixel coordinates
-- Training for 5-10 epochs with the new module allows for much more stable results running on a video feed
+- Training for 5-10 epochs should be enought
 - This modification only works with 300w dataset
 - Also modified to be compatible with JIT tracing
 
